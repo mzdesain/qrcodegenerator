@@ -75,9 +75,9 @@
      <p id="pageSubtitle" class="text-sm text-gray-500"></p>
     </div><!-- Input Card -->
     <div class="card rounded-lg p-4 mb-4"><!-- QR Title Input -->
-     <div class="mb-3"><label for="qrTitle" id="qrTitleLabel" class="block text-sm mb-1.5 text-gray-700"> Judul </label> <input type="text" id="qrTitle" placeholder="Website Toko Saya" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
+     <div class="mb-3"><label for="qrTitle" id="qrTitleLabel" class="block text-sm mb-1.5 text-gray-700"> Judul </label> <input type="text" id="qrTitle" placeholder="Website Saya" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
      </div><!-- URL Input -->
-     <div class="mb-3"><label for="urlInput" id="inputLabel" class="block text-sm mb-1.5 text-gray-700"> URL </label> <input type="url" id="urlInput" placeholder="https://example.com" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
+     <div class="mb-3"><label for="urlInput" id="inputLabel" class="block text-sm mb-1.5 text-gray-700"> URL </label> <input type="url" id="urlInput" placeholder="https://website.com" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
      </div><!-- Generate Button --> <button id="generateBtn" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all text-white"> <span id="generateBtnText">Generate</span> </button> <!-- Error Message -->
      <div id="errorMessage" class="hidden mt-3 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
       Masukkan URL yang valid (contoh: https://example.com)
@@ -95,14 +95,14 @@
      </div>
     </footer>
    </div>
-  </div><!-- Floating WhatsApp Button --> <a href="https://wa.me/6285251675" target="_blank" rel="noopener noreferrer" id="floatingWA" class="floating-wa"> <i class="fab fa-whatsapp text-white text-3xl"></i> </a>
+  </div><!-- Floating WhatsApp Button --> <a href="https://wa.me/6285251675143" target="_blank" rel="noopener noreferrer" id="floatingWA" class="floating-wa"> <i class="fab fa-whatsapp text-white text-3xl"></i> </a>
   <script>
         const defaultConfig = {
             page_title: "",
             page_subtitle: "",
-            qr_title_label: "Judul",
-            url_label: "URL",
-            url_placeholder: "https://example.com",
+            qr_title_label: "",
+            url_label: "",
+            url_placeholder: "https://website.com",
             generate_button_text: "Generate",
             download_button_text: "Download",
             footer_text: "",
@@ -157,7 +157,7 @@
             qrTitleLabel.textContent = qrLabel;
             inputLabel.textContent = label;
             urlInput.placeholder = placeholder;
-            qrTitle.placeholder = "Website Toko Saya";
+            qrTitle.placeholder = "Website Saya";
             generateBtnText.textContent = generateText;
             downloadBtnText.textContent = downloadText;
             footerText.textContent = footer;
