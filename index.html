@@ -7,48 +7,111 @@
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
         body {
             box-sizing: border-box;
+        }
+        
+        .floating-wa {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            z-index: 1000;
+        }
+        
+        .floating-wa:hover {
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 640px) {
+            .floating-wa {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        .app-container {
+            max-width: 420px;
+        }
+        
+        input {
+            transition: border-color 0.15s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+        
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+        }
+        
+        button:active {
+            transform: scale(0.98);
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div id="app" class="w-full h-full overflow-auto bg-gradient-to-br from-purple-50 to-blue-50 p-8">
-   <div class="max-w-2xl mx-auto">
-    <div class="text-center mb-8">
-     <h1 id="pageTitle" class="text-5xl font-bold mb-3">Pembuat QR Code</h1>
-     <p id="pageSubtitle" class="text-xl text-gray-600">Ubah URL menjadi QR Code dalam sekejap</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6">
-     <div class="mb-6"><label for="urlInput" id="inputLabel" class="block text-lg font-semibold mb-3 text-gray-700">Masukkan URL:</label> <input type="url" id="urlInput" placeholder="https://contoh.com" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition-colors text-lg">
-     </div><button id="generateBtn" class="w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"> Buat QR Code </button>
-     <div id="errorMessage" class="hidden mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-      <p class="font-semibold">⚠️ URL tidak valid</p>
-      <p class="text-sm">Mohon masukkan URL yang lengkap (contoh: https://contoh.com)</p>
+  <div id="app" class="w-full h-full overflow-auto p-4 sm:p-6">
+   <div class="app-container mx-auto"><!-- Header -->
+    <div class="mb-8">
+     <h1 id="pageTitle" class="text-xl font-semibold mb-1"></h1>
+     <p id="pageSubtitle" class="text-sm text-gray-500"></p>
+    </div><!-- Input Card -->
+    <div class="card rounded-lg p-4 mb-4"><!-- QR Title Input -->
+     <div class="mb-3"><label for="qrTitle" id="qrTitleLabel" class="block text-sm mb-1.5 text-gray-700"> Judul </label> <input type="text" id="qrTitle" placeholder="Website Toko Saya" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
+     </div><!-- URL Input -->
+     <div class="mb-3"><label for="urlInput" id="inputLabel" class="block text-sm mb-1.5 text-gray-700"> URL </label> <input type="url" id="urlInput" placeholder="https://example.com" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white">
+     </div><!-- Generate Button --> <button id="generateBtn" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all text-white"> <span id="generateBtnText">Generate</span> </button> <!-- Error Message -->
+     <div id="errorMessage" class="hidden mt-3 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+      Masukkan URL yang valid (contoh: https://example.com)
      </div>
-    </div>
-    <div id="qrSection" class="hidden bg-white rounded-2xl shadow-2xl p-8 text-center">
-     <h2 class="text-2xl font-bold mb-6 text-gray-800">QR Code Anda</h2>
-     <div id="qrCodeContainer" class="flex justify-center mb-6 p-6 bg-gray-50 rounded-xl"></div><button id="downloadBtn" class="px-8 py-3 rounded-lg font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg">Download QR Code </button>
-    </div>
+    </div><!-- QR Code Result -->
+    <div id="qrSection" class="hidden card rounded-lg p-4 text-center"><!-- QR Title Display -->
+     <div id="qrTitleDisplay" class="mb-3">
+      <h3 id="qrTitleText" class="text-base font-medium text-gray-800"></h3>
+     </div>
+     <div id="qrCodeContainer" class="flex justify-center mb-3"></div><button id="downloadBtn" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all text-white"> <span id="downloadBtnText">Download</span> </button>
+    </div><!-- Footer -->
+    <footer class="mt-8 text-center pb-20">
+     <div class="text-xs text-gray-500">
+      <p id="footerText" class="mb-1"></p><a href="https://instagram.com/muzanni.uce" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-800"> <i class="fab fa-instagram mr-1"></i><span id="instagramUsername">muzanni.uce</span> </a>
+     </div>
+    </footer>
    </div>
-  </div>
+  </div><!-- Floating WhatsApp Button --> <a href="https://wa.me/6285251675" target="_blank" rel="noopener noreferrer" id="floatingWA" class="floating-wa"> <i class="fab fa-whatsapp text-white text-3xl"></i> </a>
   <script>
         const defaultConfig = {
-            page_title: "Pembuat QR Code",
-            page_subtitle: "Ubah URL menjadi QR Code dalam sekejap",
-            input_label: "Masukkan URL:",
-            input_placeholder: "https://contoh.com",
-            generate_button_text: "Buat QR Code",
-            download_button_text: "Download QR Code",
-            background_color: "#f3e8ff",
+            page_title: "",
+            page_subtitle: "",
+            qr_title_label: "Judul",
+            url_label: "URL",
+            url_placeholder: "https://example.com",
+            generate_button_text: "Generate",
+            download_button_text: "Download",
+            footer_text: "",
+            instagram_username: "muzanni.uce",
+            background_color: "#f9fafb",
             surface_color: "#ffffff",
-            text_color: "#1f2937",
-            primary_action_color: "#9333ea",
-            secondary_action_color: "#3b82f6",
+            text_color: "#111827",
+            primary_action_color: "#6366f1",
+            secondary_action_color: "#10b981",
             font_family: "system-ui",
             font_size: 16
         };
@@ -58,18 +121,28 @@
         async function onConfigChange(config) {
             const pageTitle = document.getElementById('pageTitle');
             const pageSubtitle = document.getElementById('pageSubtitle');
+            const qrTitleLabel = document.getElementById('qrTitleLabel');
             const inputLabel = document.getElementById('inputLabel');
             const urlInput = document.getElementById('urlInput');
+            const qrTitle = document.getElementById('qrTitle');
             const generateBtn = document.getElementById('generateBtn');
+            const generateBtnText = document.getElementById('generateBtnText');
             const downloadBtn = document.getElementById('downloadBtn');
+            const downloadBtnText = document.getElementById('downloadBtnText');
+            const footerText = document.getElementById('footerText');
+            const instagramUsername = document.getElementById('instagramUsername');
             const app = document.getElementById('app');
+            const floatingWA = document.getElementById('floatingWA');
 
             const title = config.page_title || defaultConfig.page_title;
             const subtitle = config.page_subtitle || defaultConfig.page_subtitle;
-            const label = config.input_label || defaultConfig.input_label;
-            const placeholder = config.input_placeholder || defaultConfig.input_placeholder;
+            const qrLabel = config.qr_title_label || defaultConfig.qr_title_label;
+            const label = config.url_label || defaultConfig.url_label;
+            const placeholder = config.url_placeholder || defaultConfig.url_placeholder;
             const generateText = config.generate_button_text || defaultConfig.generate_button_text;
             const downloadText = config.download_button_text || defaultConfig.download_button_text;
+            const footer = config.footer_text || defaultConfig.footer_text;
+            const instagram = config.instagram_username || defaultConfig.instagram_username;
             
             const bgColor = config.background_color || defaultConfig.background_color;
             const surfaceColor = config.surface_color || defaultConfig.surface_color;
@@ -81,43 +154,59 @@
 
             pageTitle.textContent = title;
             pageSubtitle.textContent = subtitle;
+            qrTitleLabel.textContent = qrLabel;
             inputLabel.textContent = label;
             urlInput.placeholder = placeholder;
-            generateBtn.textContent = generateText;
-            downloadBtn.textContent = downloadText;
+            qrTitle.placeholder = "Website Toko Saya";
+            generateBtnText.textContent = generateText;
+            downloadBtnText.textContent = downloadText;
+            footerText.textContent = footer;
+            instagramUsername.textContent = instagram;
 
-            app.style.background = `linear-gradient(to bottom right, ${bgColor}, ${adjustColor(bgColor, -20)})`;
-            document.querySelectorAll('.bg-white').forEach(el => el.style.backgroundColor = surfaceColor);
+            app.style.backgroundColor = bgColor;
+            document.querySelectorAll('.card').forEach(el => el.style.backgroundColor = surfaceColor);
             
             pageTitle.style.color = textColor;
-            pageTitle.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            pageTitle.style.fontSize = `${baseFontSize * 2.5}px`;
+            pageTitle.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            pageTitle.style.fontSize = `${baseFontSize * 1.25}px`;
             
-            pageSubtitle.style.color = adjustColor(textColor, 60);
-            pageSubtitle.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            pageSubtitle.style.fontSize = `${baseFontSize * 1.25}px`;
+            pageSubtitle.style.color = adjustColor(textColor, 80);
+            pageSubtitle.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            pageSubtitle.style.fontSize = `${baseFontSize * 0.875}px`;
+            
+            qrTitleLabel.style.color = textColor;
+            qrTitleLabel.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            qrTitleLabel.style.fontSize = `${baseFontSize * 0.875}px`;
             
             inputLabel.style.color = textColor;
-            inputLabel.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            inputLabel.style.fontSize = `${baseFontSize * 1.125}px`;
+            inputLabel.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            inputLabel.style.fontSize = `${baseFontSize * 0.875}px`;
             
-            urlInput.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            urlInput.style.fontSize = `${baseFontSize * 1.125}px`;
+            urlInput.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            urlInput.style.fontSize = `${baseFontSize * 0.875}px`;
+            
+            qrTitle.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            qrTitle.style.fontSize = `${baseFontSize * 0.875}px`;
             
             generateBtn.style.backgroundColor = primaryColor;
             generateBtn.style.color = '#ffffff';
-            generateBtn.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            generateBtn.style.fontSize = `${baseFontSize * 1.125}px`;
+            generateBtn.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            generateBtn.style.fontSize = `${baseFontSize * 0.875}px`;
             
             downloadBtn.style.backgroundColor = secondaryColor;
             downloadBtn.style.color = '#ffffff';
-            downloadBtn.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-            downloadBtn.style.fontSize = `${baseFontSize * 1.125}px`;
+            downloadBtn.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            downloadBtn.style.fontSize = `${baseFontSize * 0.875}px`;
+            
+            floatingWA.style.backgroundColor = '#25D366';
+            
+            footerText.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+            footerText.style.fontSize = `${baseFontSize * 0.75}px`;
 
-            document.querySelectorAll('h2').forEach(el => {
+            document.querySelectorAll('h3').forEach(el => {
                 el.style.color = textColor;
-                el.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
-                el.style.fontSize = `${baseFontSize * 1.5}px`;
+                el.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+                el.style.fontSize = `${baseFontSize}px`;
             });
         }
 
@@ -140,24 +229,30 @@
 
         document.getElementById('generateBtn').addEventListener('click', function() {
             const urlInput = document.getElementById('urlInput');
+            const qrTitleInput = document.getElementById('qrTitle');
             const url = urlInput.value.trim();
+            const qrTitle = qrTitleInput.value.trim();
             const errorMessage = document.getElementById('errorMessage');
             const qrSection = document.getElementById('qrSection');
             const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrTitleDisplay = document.getElementById('qrTitleDisplay');
+            const qrTitleText = document.getElementById('qrTitleText');
 
-            if (!url) {
-                errorMessage.classList.remove('hidden');
-                qrSection.classList.add('hidden');
-                return;
-            }
-
-            if (!isValidURL(url)) {
+            if (!url || !isValidURL(url)) {
                 errorMessage.classList.remove('hidden');
                 qrSection.classList.add('hidden');
                 return;
             }
 
             errorMessage.classList.add('hidden');
+
+            // Show or hide QR title display
+            if (qrTitle) {
+                qrTitleText.textContent = qrTitle;
+                qrTitleDisplay.classList.remove('hidden');
+            } else {
+                qrTitleDisplay.classList.add('hidden');
+            }
 
             // Clear previous QR code
             qrCodeContainer.innerHTML = '';
@@ -166,21 +261,24 @@
             const qrWrapper = document.createElement('div');
             qrWrapper.id = 'qrcode';
             qrWrapper.style.display = 'inline-block';
-            qrWrapper.style.padding = '20px';
+            qrWrapper.style.padding = '12px';
             qrWrapper.style.backgroundColor = '#ffffff';
-            qrWrapper.style.borderRadius = '12px';
-            qrWrapper.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            qrWrapper.style.borderRadius = '8px';
+            qrWrapper.style.border = '1px solid #e5e7eb';
             qrCodeContainer.appendChild(qrWrapper);
             
             // Generate QR Code using QRCode.js library
+            const qrSize = window.innerWidth < 640 ? 180 : 240;
             currentQRElement = new QRCode(qrWrapper, {
                 text: url,
-                width: 400,
-                height: 400,
+                width: qrSize,
+                height: qrSize,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+            
+            // QR code without text overlay for better scannability
             
             qrSection.classList.remove('hidden');
             qrSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -190,11 +288,24 @@
             const qrCanvas = document.querySelector('#qrcode canvas');
             if (!qrCanvas) return;
 
-            qrCanvas.toBlob(function(blob) {
+            // Create a SUPER HD canvas for download (2000x2000)
+            const downloadSize = 2000;
+            const downloadCanvas = document.createElement('canvas');
+            downloadCanvas.width = downloadSize;
+            downloadCanvas.height = downloadSize;
+            const downloadCtx = downloadCanvas.getContext('2d');
+            
+            // Scale up the QR code with crisp, sharp rendering
+            downloadCtx.imageSmoothingEnabled = false;
+            downloadCtx.drawImage(qrCanvas, 0, 0, downloadSize, downloadSize);
+
+            downloadCanvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'qrcode.png';
+                const qrTitle = document.getElementById('qrTitle').value.trim();
+                const filename = qrTitle ? `qrcode-${qrTitle.replace(/\s+/g, '-').toLowerCase()}.png` : 'qrcode.png';
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -206,6 +317,13 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 document.getElementById('generateBtn').click();
+            }
+        });
+
+        document.getElementById('qrTitle').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('urlInput').focus();
             }
         });
 
@@ -270,15 +388,18 @@
                 mapToEditPanelValues: (config) => new Map([
                     ['page_title', config.page_title || defaultConfig.page_title],
                     ['page_subtitle', config.page_subtitle || defaultConfig.page_subtitle],
-                    ['input_label', config.input_label || defaultConfig.input_label],
-                    ['input_placeholder', config.input_placeholder || defaultConfig.input_placeholder],
+                    ['qr_title_label', config.qr_title_label || defaultConfig.qr_title_label],
+                    ['url_label', config.url_label || defaultConfig.url_label],
+                    ['url_placeholder', config.url_placeholder || defaultConfig.url_placeholder],
                     ['generate_button_text', config.generate_button_text || defaultConfig.generate_button_text],
-                    ['download_button_text', config.download_button_text || defaultConfig.download_button_text]
+                    ['download_button_text', config.download_button_text || defaultConfig.download_button_text],
+                    ['footer_text', config.footer_text || defaultConfig.footer_text],
+                    ['instagram_username', config.instagram_username || defaultConfig.instagram_username]
                 ])
             });
         }
 
         onConfigChange(defaultConfig);
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab6f7ab63162035',t:'MTc2NTMwOTE1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab73b6b95a62035',t:'MTc2NTMxMTkzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
