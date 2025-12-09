@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto bg-gradient-to-br from-purple-50 to-blue-50 p-8">
+   <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+     <h1 id="pageTitle" class="text-5xl font-bold mb-3">Pembuat QR Code</h1>
+     <p id="pageSubtitle" class="text-xl text-gray-600">Ubah URL menjadi QR Code dalam sekejap</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6">
+     <div class="mb-6"><label for="urlInput" id="inputLabel" class="block text-lg font-semibold mb-3 text-gray-700">Masukkan URL:</label> <input type="url" id="urlInput" placeholder="https://contoh.com" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition-colors text-lg">
+     </div><button id="generateBtn" class="w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"> Buat QR Code </button>
+     <div id="errorMessage" class="hidden mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+      <p class="font-semibold">⚠️ URL tidak valid</p>
+      <p class="text-sm">Mohon masukkan URL yang lengkap (contoh: https://contoh.com)</p>
+     </div>
+    </div>
+    <div id="qrSection" class="hidden bg-white rounded-2xl shadow-2xl p-8 text-center">
+     <h2 class="text-2xl font-bold mb-6 text-gray-800">QR Code Anda</h2>
+     <div id="qrCodeContainer" class="flex justify-center mb-6 p-6 bg-gray-50 rounded-xl"></div><button id="downloadBtn" class="px-8 py-3 rounded-lg font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg">Download QR Code </button>
+    </div>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            page_title: "Pembuat QR Code",
+            page_subtitle: "Ubah URL menjadi QR Code dalam sekejap",
+            input_label: "Masukkan URL:",
+            input_placeholder: "https://contoh.com",
+            generate_button_text: "Buat QR Code",
+            download_button_text: "Download QR Code",
+            background_color: "#f3e8ff",
+            surface_color: "#ffffff",
+            text_color: "#1f2937",
+            primary_action_color: "#9333ea",
+            secondary_action_color: "#3b82f6",
+            font_family: "system-ui",
+            font_size: 16
+        };
+
+        let currentQRElement = null;
+
+        async function onConfigChange(config) {
+            const pageTitle = document.getElementById('pageTitle');
+            const pageSubtitle = document.getElementById('pageSubtitle');
+            const inputLabel = document.getElementById('inputLabel');
+            const urlInput = document.getElementById('urlInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const app = document.getElementById('app');
+
+            const title = config.page_title || defaultConfig.page_title;
+            const subtitle = config.page_subtitle || defaultConfig.page_subtitle;
+            const label = config.input_label || defaultConfig.input_label;
+            const placeholder = config.input_placeholder || defaultConfig.input_placeholder;
+            const generateText = config.generate_button_text || defaultConfig.generate_button_text;
+            const downloadText = config.download_button_text || defaultConfig.download_button_text;
+            
+            const bgColor = config.background_color || defaultConfig.background_color;
+            const surfaceColor = config.surface_color || defaultConfig.surface_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+            const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+            const fontFamily = config.font_family || defaultConfig.font_family;
+            const baseFontSize = config.font_size || defaultConfig.font_size;
+
+            pageTitle.textContent = title;
+            pageSubtitle.textContent = subtitle;
+            inputLabel.textContent = label;
+            urlInput.placeholder = placeholder;
+            generateBtn.textContent = generateText;
+            downloadBtn.textContent = downloadText;
+
+            app.style.background = `linear-gradient(to bottom right, ${bgColor}, ${adjustColor(bgColor, -20)})`;
+            document.querySelectorAll('.bg-white').forEach(el => el.style.backgroundColor = surfaceColor);
+            
+            pageTitle.style.color = textColor;
+            pageTitle.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            pageTitle.style.fontSize = `${baseFontSize * 2.5}px`;
+            
+            pageSubtitle.style.color = adjustColor(textColor, 60);
+            pageSubtitle.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            pageSubtitle.style.fontSize = `${baseFontSize * 1.25}px`;
+            
+            inputLabel.style.color = textColor;
+            inputLabel.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            inputLabel.style.fontSize = `${baseFontSize * 1.125}px`;
+            
+            urlInput.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            urlInput.style.fontSize = `${baseFontSize * 1.125}px`;
+            
+            generateBtn.style.backgroundColor = primaryColor;
+            generateBtn.style.color = '#ffffff';
+            generateBtn.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            generateBtn.style.fontSize = `${baseFontSize * 1.125}px`;
+            
+            downloadBtn.style.backgroundColor = secondaryColor;
+            downloadBtn.style.color = '#ffffff';
+            downloadBtn.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+            downloadBtn.style.fontSize = `${baseFontSize * 1.125}px`;
+
+            document.querySelectorAll('h2').forEach(el => {
+                el.style.color = textColor;
+                el.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+                el.style.fontSize = `${baseFontSize * 1.5}px`;
+            });
+        }
+
+        function adjustColor(color, amount) {
+            const hex = color.replace('#', '');
+            const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+            const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+            const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+
+        function isValidURL(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const qrSection = document.getElementById('qrSection');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+
+            if (!url) {
+                errorMessage.classList.remove('hidden');
+                qrSection.classList.add('hidden');
+                return;
+            }
+
+            if (!isValidURL(url)) {
+                errorMessage.classList.remove('hidden');
+                qrSection.classList.add('hidden');
+                return;
+            }
+
+            errorMessage.classList.add('hidden');
+
+            // Clear previous QR code
+            qrCodeContainer.innerHTML = '';
+            
+            // Create QR code container
+            const qrWrapper = document.createElement('div');
+            qrWrapper.id = 'qrcode';
+            qrWrapper.style.display = 'inline-block';
+            qrWrapper.style.padding = '20px';
+            qrWrapper.style.backgroundColor = '#ffffff';
+            qrWrapper.style.borderRadius = '12px';
+            qrWrapper.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            qrCodeContainer.appendChild(qrWrapper);
+            
+            // Generate QR Code using QRCode.js library
+            currentQRElement = new QRCode(qrWrapper, {
+                text: url,
+                width: 400,
+                height: 400,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            qrSection.classList.remove('hidden');
+            qrSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (!qrCanvas) return;
+
+            qrCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'qrcode.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        });
+
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('generateBtn').click();
+            }
+        });
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (value) => {
+                                config.background_color = value;
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.surface_color || defaultConfig.surface_color,
+                            set: (value) => {
+                                config.surface_color = value;
+                                window.elementSdk.setConfig({ surface_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (value) => {
+                                config.text_color = value;
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                            set: (value) => {
+                                config.primary_action_color = value;
+                                window.elementSdk.setConfig({ primary_action_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                            set: (value) => {
+                                config.secondary_action_color = value;
+                                window.elementSdk.setConfig({ secondary_action_color: value });
+                            }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: {
+                        get: () => config.font_family || defaultConfig.font_family,
+                        set: (value) => {
+                            config.font_family = value;
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    },
+                    fontSizeable: {
+                        get: () => config.font_size || defaultConfig.font_size,
+                        set: (value) => {
+                            config.font_size = value;
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ['page_title', config.page_title || defaultConfig.page_title],
+                    ['page_subtitle', config.page_subtitle || defaultConfig.page_subtitle],
+                    ['input_label', config.input_label || defaultConfig.input_label],
+                    ['input_placeholder', config.input_placeholder || defaultConfig.input_placeholder],
+                    ['generate_button_text', config.generate_button_text || defaultConfig.generate_button_text],
+                    ['download_button_text', config.download_button_text || defaultConfig.download_button_text]
+                ])
+            });
+        }
+
+        onConfigChange(defaultConfig);
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab6f7ab63162035',t:'MTc2NTMwOTE1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
